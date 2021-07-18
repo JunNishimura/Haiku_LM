@@ -22,10 +22,10 @@ def split_input_target(sequence):
 if __name__ == '__main__':
     # 俳句DataFrameの取得
     try:
-        df = pd.read_pickle(PKL_PATH)
+        df = pd.read_pickle(HAIKU_PKL_PATH)
     except:
         import pickle
-        with open(PKL_PATH, 'rb') as f:
+        with open(HAIKU_PKL_PATH, 'rb') as f:
             df = pickle.load(f)
     
     # 俳句リストの取得

@@ -1,4 +1,4 @@
-PKL_PATH = '../pickles/haiku_df.pkl'
+HAIKU_PKL_PATH = '../pickles/haiku_df.pkl'
 SEQ_LENGTH = 100
 BATCH_SIZE = 50
 BUFFER_SIZE = 10000
@@ -6,3 +6,4 @@ EMBEDDING_DIM = 256
 RNN_UNITS = 1024
 LEARNING_RATE = 0.02
 EPOCHS = 10
+HAIKU_NUM = 10
