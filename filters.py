@@ -52,7 +52,7 @@ class HaikuFilter():
                 words.append(n.surface)
             n = n.next
 
-        return words    
+        return words
 
     def kigo(self, haiku: str) -> bool:
         '''
@@ -96,11 +96,29 @@ class HaikuFilter():
         ------
             true if haiku has kireji
         '''
-        kireji_list = ['や', 'かな', '哉', 'けり']
+        kireji_list = ['かな', '哉', 'もがな', 'し', 'じ', 'や', 'らん', 'か', 'けり', 'よ', 'ぞ', 'つ', 'せ', 'ず', 'れ', 'ぬ', 'へ', 'け', 'いかに']
+        kireji_flag = False
+        
+        for w in self.tagger.parse(haiku).split():
+            if w in kireji_list:
+                kireji_flag = True
+        
+        # 切れ字がなければその時点でアウト
+        if not kireji_flag:
+            return False
+
+        # 切れ字があ場合、適切な位置に切れ字があるかをチェック
+        pos = 0
         n = self.tagger.parseToNode(haiku)
         while n:
             features = n.feature.split(',')
             if features[0] != u'BOS/EOS':
-                yomi = n.feature.split(',')[6]
-            
+                yomi = features[6]
+                pos += len(yomi)
+
+                # 5-7-5の終わりに切れ字がある場合はok
+                if pos == 5 or pos == 12 or pos == 17:
+                    if n.surface in kireji_list:
+                        return True
             n = n.next
+        return False
