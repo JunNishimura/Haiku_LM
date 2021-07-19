@@ -6,7 +6,7 @@ class HaikuFilter():
         self.tagger = MeCab.Tagger('-Owakati')
         self.kigo_dict = None
         
-    def word_count(self, haiku) -> bool:
+    def check_wordcount(self, haiku) -> bool:
         '''
         17音であるかのチェック
 
@@ -54,9 +54,9 @@ class HaikuFilter():
 
         return words
 
-    def kigo(self, haiku: str) -> bool:
+    def check_kigo(self, haiku: str):
         '''
-        季語が含まれているかのチェック
+        季語が含まれているかをチェックし、含まれている場合は季語とその季節を返す
 
         Parameters
         ----------
@@ -64,7 +64,10 @@ class HaikuFilter():
                 チェック対象となる俳句
         Return
         ------
-            true if haiku has kigo
+            kigo: str
+                季語、ない場合はNone
+            season: str
+                季節、ない場合はNone
         '''
         # 季語辞書がまだない場合
         if not self.kigo_dict:
@@ -80,11 +83,11 @@ class HaikuFilter():
                 for k, v in self.kigo_dict.items():
                     # もし季語が見つかればTrueを返す
                     if noun in v:
-                        return True
+                        return v, k
 
-        return False
+        return None, None
 
-    def kireji(self, haiku: str) -> bool:
+    def check_kireji(self, haiku: str) -> bool:
         '''
         切れ字が含まれているかのチェック
 
@@ -120,5 +123,30 @@ class HaikuFilter():
                 if pos == 5 or pos == 12 or pos == 17:
                     if n.surface in kireji_list:
                         return True
+            n = n.next
+        return False
+
+    def check_association(self, haiku: str, associative_words: list) -> bool:
+        '''
+        句の連続性を確認
+
+        Parameters
+        ----------
+            haiku: str
+                俳句
+            associative_words: list
+                連想単語の一覧
+        Return
+        ------
+            true if haiku has an associative word
+        '''
+
+        n = self.tagger.parseToNode(haiku)
+        while n:
+            features = n.feature.split(',')
+            if features[0] != u'BOS/EOS':
+                # もし連想単語リストに含まれている単語が俳句に含まれていたらTrueを返す
+                if n.surface in associative_words:
+                    return True
             n = n.next
         return False

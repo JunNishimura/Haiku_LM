@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 import pandas as pd
+import fasttext
 from utils import create_model, preprocess, text_from_ids
 from models import OneStep
 from filters import HaikuFilter
@@ -23,16 +24,16 @@ if __name__=='__main__':
         units=RNN_UNITS,
         adam_lr=LEARNING_RATE
     )
-    checkpoint_dir = './training_checkpoints'
-    latest = tf.train.latest_checkpoint(checkpoint_dir)
+    latest = tf.train.latest_checkpoint(CHECKPOINT_DIR)
     model.load_weights(latest) # load parameters
-
-    # 事前準備
+    
     haiku_filter = HaikuFilter()
     one_step_model = OneStep(model, chars_from_ids, ids_from_chars)
     states = [None, None, None]
     next_char = tf.constant(['\n'])
     generated_haiku_list = [] # 生成した俳句の一覧を格納するためのリスト
+    ft = fasttext.load_model(FASTTEXT_MODEL_PATH)
+    associative_words = None # 連想文字の一覧
 
     # 指定回数まで俳句の生成を続ける
     while len(generated_haiku_list) < HAIKU_NUM:
@@ -52,21 +53,42 @@ if __name__=='__main__':
         # リストから文字列に変換して、utf-8へデコードする
         haiku = tf.strings.join(haiku)
         haiku = haiku[0].numpy().decode('utf-8')
-
-        # # 17音であるかのチェック
-        # if not word_count_check(haiku):
-        #     continue
         
-        # # 季語が含まれているかのチェック
-        # if not kigo_check(haiku):
+        # 季語フィルターを適用
+        # kigo, season = haiku_filter.check_kigo(haiku)
+        # if not kigo: # 季語がない場合はスキップ
         #     continue
 
-        # # 切れ字が含まれているかのチェック
-        # if not kireji_check(haiku):
+        # # 文字数フィルター
+        # if not haiku_filter.check_wordcount(haiku):
         #     continue
+
+        # #-------------------- 発句 --------------------#
+        # # 発句は切れ字を含んでいる必要がある
+        # if len(generated_haiku_list) == 0:
+        #     if not haiku_filter.check_kireji(haiku):
+        #         continue
+
+        # #-------------------- 脇句 --------------------#
+        # # 脇句は発句と同じ季節の句である必要がある
+        # if len(generated_haiku_list) == 1:
+        #     prev_kigo, prev_season = haiku_filter.check_kigo(generated_haiku_list[0])
+        #     if season != prev_season:
+        #         continue
+
+        # #-------------------- 二句目以降 --------------------#
+        # # 二句目以降は前句と連続している必要がある
+        # if len(generated_haiku_list) >= 1:
+        #     if not haiku_filter.check_association(haiku, associative_words):
+        #         continue
 
         # generated_haiku_listへ追加
         generated_haiku_list.append(haiku)
+
+        # 季語から連想される単語の一覧を格納
+        # 連想単語はfasttextを用いて、季語との近傍単語を50個選択
+        # associative_words = ft.get_nearest_neighbors(kigo)
+        # associative_words = [w[1] for w in associative_words]
 
     # 生成俳句を出力
     for gh in generated_haiku_list:
