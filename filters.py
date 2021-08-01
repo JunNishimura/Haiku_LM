@@ -7,7 +7,7 @@ class HaikuFilter():
         self.tagger = MeCab.Tagger('-Owakati')
         self.kigo_dict = None
     
-    def __get_yomi(self, features: list) -> int:
+    def __get_yomi(self, surface: str, features: list) -> int:
         '''
         形態素の読みを返す
 
@@ -26,7 +26,7 @@ class HaikuFilter():
             yomi = re.sub(r'[ッャュョー]', '', yomi)
             yomi_len = len(yomi)
         except:
-            for c in n.surface:
+            for c in surface:
                 # カタカナは文字数分だけカウント
                 if c in 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワオンガギグゲゴザジズゼゾダヂヅデドバビプべボパピプペポッャュョ':
                     yomi_len = 1
@@ -56,7 +56,7 @@ class HaikuFilter():
         while n:
             features = n.feature.split(',')
             if features[0] != u'BOS/EOS':
-                cnt += self.__get_yomi(features)
+                cnt += self.__get_yomi(n.surface, features)
             n = n.next
         
         return cnt >= 17-margin and cnt <= 17+margin
@@ -180,5 +180,5 @@ class HaikuFilter():
                 if n.surface in associative_words:
                     return True
             n = n.next
-            
+
         return False
