@@ -1,4 +1,5 @@
 import MeCab
+import re
 import pickle
 
 class HaikuFilter():
@@ -6,28 +7,41 @@ class HaikuFilter():
         self.tagger = MeCab.Tagger('-Owakati')
         self.kigo_dict = None
         
-    def check_wordcount(self, haiku) -> bool:
+    def check_wordcount(self, haiku: str, margin: int) -> bool:
         '''
-        17音であるかのチェック
-
+        俳句文字数フィルター
+        
         Parameters
         ----------
             haiku: str
-                チェック対象となる俳句
-        Return
-        ------
-            true if haiku is composed of 17 sounds
+                俳句
+            margin: int
+                フィルター文字数を17音から余裕を持たせる数　（例：margin=1 → 16, 17, 18）
+        
+        Returns
+        -------
+            true if haiku passes wordcount filter
         '''
-        yomi_haiku = ''
+        cnt = 0
         n = self.tagger.parseToNode(haiku)
         while n:
             features = n.feature.split(',')
             if features[0] != u'BOS/EOS':
-                yomi = n.feature.split(',')[6]
-                yomi_haiku += yomi
+                try:
+                    yomi = features[17]
+                    yomi = re.sub(r'[ッャュョー]', '', yomi)
+                    cnt += len(yomi)
+                except:
+                    for c in n.surface:
+                        # カタカナは文字数分だけカウント
+                        if c in 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワオンガギグゲゴザジズゼゾダヂヅデドバビプべボパピプペポッャュョ':
+                            cnt += 1
+                        else:
+                            # 漢字の場合は1漢字2音としてカウント
+                            cnt += 2
             n = n.next
         
-        return len(yomi_haiku) == 17
+        return cnt >= 17-margin and cnt <= 17+margin
 
     def pos_extract(self, haiku, pos) -> list:
         '''
