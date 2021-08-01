@@ -60,7 +60,7 @@ if __name__=='__main__':
             continue
 
         # # 文字数フィルター
-        if not haiku_filter.check_wordcount(haiku):
+        if not haiku_filter.check_wordcount(haiku, margin=2):
             continue
 
         # #-------------------- 発句 --------------------#
