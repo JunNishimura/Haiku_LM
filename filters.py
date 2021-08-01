@@ -6,6 +6,35 @@ class HaikuFilter():
     def __init__(self):
         self.tagger = MeCab.Tagger('-Owakati')
         self.kigo_dict = None
+    
+    def __get_yomi(self, features: list) -> int:
+        '''
+        形態素の読みを返す
+
+        Parameters
+        ----------
+            features: list
+                形態素解析で得られるfeatures
+            
+        Returns
+        -------
+            length of yomi (i.e. は -> 1, 花 -> 2)
+        '''
+        yomi_len = 0
+        try:
+            yomi = features[17]
+            yomi = re.sub(r'[ッャュョー]', '', yomi)
+            yomi_len = len(yomi)
+        except:
+            for c in n.surface:
+                # カタカナは文字数分だけカウント
+                if c in 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワオンガギグゲゴザジズゼゾダヂヅデドバビプべボパピプペポッャュョ':
+                    yomi_len = 1
+                else:
+                    # 漢字の場合は1漢字2音としてカウント
+                    yomi_len = 2
+        
+        return yomi_len
         
     def check_wordcount(self, haiku: str, margin: int) -> bool:
         '''
@@ -27,18 +56,7 @@ class HaikuFilter():
         while n:
             features = n.feature.split(',')
             if features[0] != u'BOS/EOS':
-                try:
-                    yomi = features[17]
-                    yomi = re.sub(r'[ッャュョー]', '', yomi)
-                    cnt += len(yomi)
-                except:
-                    for c in n.surface:
-                        # カタカナは文字数分だけカウント
-                        if c in 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワオンガギグゲゴザジズゼゾダヂヅデドバビプべボパピプペポッャュョ':
-                            cnt += 1
-                        else:
-                            # 漢字の場合は1漢字2音としてカウント
-                            cnt += 2
+                cnt += self.__get_yomi(features)
             n = n.next
         
         return cnt >= 17-margin and cnt <= 17+margin
@@ -130,8 +148,7 @@ class HaikuFilter():
         while n:
             features = n.feature.split(',')
             if features[0] != u'BOS/EOS':
-                yomi = features[6]
-                pos += len(yomi)
+                pos += self.__get_yomi(features)
 
                 # 5-7-5の終わりに切れ字がある場合はok
                 if pos == 5 or pos == 12 or pos == 17:
@@ -163,4 +180,5 @@ class HaikuFilter():
                 if n.surface in associative_words:
                     return True
             n = n.next
+            
         return False
