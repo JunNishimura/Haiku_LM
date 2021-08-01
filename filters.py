@@ -148,7 +148,7 @@ class HaikuFilter():
         while n:
             features = n.feature.split(',')
             if features[0] != u'BOS/EOS':
-                pos += self.__get_yomi(features)
+                pos += self.__get_yomi(n.surface, features)
 
                 # 5-7-5の終わりに切れ字がある場合はok
                 if pos == 5 or pos == 12 or pos == 17:
