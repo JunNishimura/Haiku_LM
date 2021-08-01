@@ -45,8 +45,8 @@ if __name__=='__main__':
             next_char, states = one_step_model.generate_one_step(next_char, states=states)
             decoded_char = next_char[0].numpy().decode('utf-8')
 
-            # 改行文字が出たら俳句完成と見なして、フィルターに掛ける
-            if decoded_char == '\n':
+            # 改行文字が出たら俳句完成と見なす（ただし空文字でない事）
+            if decoded_char == '\n' and len(haiku):
                 break
             haiku.append(next_char)
 
@@ -65,9 +65,9 @@ if __name__=='__main__':
 
         # #-------------------- 発句 --------------------#
         # # 発句は切れ字を含んでいる必要がある
-        if len(generated_haiku_list) == 0:
-            if not haiku_filter.check_kireji(haiku):
-                continue
+        # if len(generated_haiku_list) == 0:
+        #     if not haiku_filter.check_kireji(haiku):
+        #         continue
 
         # #-------------------- 脇句 --------------------#
         # # 脇句は発句と同じ季節の句である必要がある
