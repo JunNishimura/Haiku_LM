@@ -55,19 +55,19 @@ if __name__=='__main__':
         haiku = haiku[0].numpy().decode('utf-8')
         
         # 季語フィルターを適用
-        # kigo, season = haiku_filter.check_kigo(haiku)
-        # if not kigo: # 季語がない場合はスキップ
-        #     continue
+        kigo, season = haiku_filter.check_kigo(haiku)
+        if not kigo: # 季語がない場合はスキップ
+            continue
 
         # # 文字数フィルター
-        # if not haiku_filter.check_wordcount(haiku):
-        #     continue
+        if not haiku_filter.check_wordcount(haiku):
+            continue
 
         # #-------------------- 発句 --------------------#
         # # 発句は切れ字を含んでいる必要がある
-        # if len(generated_haiku_list) == 0:
-        #     if not haiku_filter.check_kireji(haiku):
-        #         continue
+        if len(generated_haiku_list) == 0:
+            if not haiku_filter.check_kireji(haiku):
+                continue
 
         # #-------------------- 脇句 --------------------#
         # # 脇句は発句と同じ季節の句である必要がある
