@@ -1,6 +1,6 @@
-HAIKU_PKL_PATH = '../pickles/haiku_df.pkl'
+HAIKU_PKL_PATH = '../pickles/haiku_df_small.pkl'
 CHECKPOINT_DIR = './training_checkpoints'
-FASTTEXT_MODEL_PATH = '../fastText-0.9.2/cc.ja.300.bin'
+FASTTEXT_MODEL_PATH = '../../fastText-0.9.2/cc.ja.300.bin'
 SEQ_LENGTH = 100
 BATCH_SIZE = 50
 BUFFER_SIZE = 10000
