@@ -53,34 +53,36 @@ if __name__=='__main__':
         # リストから文字列に変換して、utf-8へデコードする
         haiku = tf.strings.join(haiku)
         haiku = haiku[0].numpy().decode('utf-8')
-        
-        # 季語フィルターを適用
-        kigo, season = haiku_filter.check_kigo(haiku)
-        if not kigo: # 季語がない場合はスキップ
-            continue
 
-        # # 文字数フィルター
-        if not haiku_filter.check_wordcount(haiku, margin=2):
-            continue
+        if IS_FILTER:
+            
+            # 季語フィルターを適用
+            kigo, season = haiku_filter.check_kigo(haiku)
+            if not kigo: # 季語がない場合はスキップ
+                continue
 
-        # #-------------------- 発句 --------------------#
-        # # 発句は切れ字を含んでいる必要がある
-        # if len(generated_haiku_list) == 0:
-        #     if not haiku_filter.check_kireji(haiku):
-        #         continue
+            # # 文字数フィルター
+            if not haiku_filter.check_wordcount(haiku, margin=2):
+                continue
 
-        # #-------------------- 脇句 --------------------#
-        # # 脇句は発句と同じ季節の句である必要がある
-        # if len(generated_haiku_list) == 1:
-        #     prev_kigo, prev_season = haiku_filter.check_kigo(generated_haiku_list[0])
-        #     if season != prev_season:
-        #         continue
+            # #-------------------- 発句 --------------------#
+            # # 発句は切れ字を含んでいる必要がある
+            # if len(generated_haiku_list) == 0:
+            #     if not haiku_filter.check_kireji(haiku):
+            #         continue
 
-        # #-------------------- 二句目以降 --------------------#
-        # # 二句目以降は前句と連続している必要がある
-        # if len(generated_haiku_list) >= 1:
-        #     if not haiku_filter.check_association(haiku, associative_words):
-        #         continue
+            # #-------------------- 脇句 --------------------#
+            # # 脇句は発句と同じ季節の句である必要がある
+            # if len(generated_haiku_list) == 1:
+            #     prev_kigo, prev_season = haiku_filter.check_kigo(generated_haiku_list[0])
+            #     if season != prev_season:
+            #         continue
+
+            # #-------------------- 二句目以降 --------------------#
+            # # 二句目以降は前句と連続している必要がある
+            # if len(generated_haiku_list) >= 1:
+            #     if not haiku_filter.check_association(haiku, associative_words):
+            #         continue
 
         # generated_haiku_listへ追加
         generated_haiku_list.append(haiku)
